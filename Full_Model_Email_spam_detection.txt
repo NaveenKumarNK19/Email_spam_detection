@@ -1,0 +1,31 @@
+import pandas as pd
+import numpy as np
+import nltk
+import string
+
+from nltk.corpus import stopwords
+
+data=pd.read_csv("D:\MY_PROJ\emails_1.csv")
+data = data.iloc[:,:2]
+df = data.dropna()
+
+df.drop_duplicates(inplace=True)
+
+nltk.download('stopwords')
+
+punc = string.punctuation
+punc_list = list(punc)
+
+def process_text(text):
+    nopunc = [char for char in text if char not in string.punctuation]
+    nopunc = ''.join(nopunc)
+
+    clean_words = [word for word in nopunc.split() if word.lower() not in punc_list]
+
+    return clean_words
+
+from sklearn.feature_extraction.text import CountVectorizer
+messages_bow=CountVectorizer(analyzer=process_text).fit_transform(df['text'])
+
+from sklearn.naive_bayes import MultinomialNB
+classifier = MultinomialNB().fit(messages_bow, df['spam'])
